@@ -1,10 +1,22 @@
 import { setUser, readConfig } from "./config";
+import { fetchFeed } from "./rss.js";
+
 import {
   createUser,
   getUserByName,
   deleteAllUsers,
   getUsers,
 } from "./db/queries/users";
+
+// Fetches and prints the RSS feed used by the aggregator.
+export async function handlerAgg(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
+
+  console.log(JSON.stringify(feed, null, 2));
+}
 
 // Defines the shape that every async CLI command handler must follow.
 export type CommandHandler = (
