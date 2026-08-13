@@ -1,21 +1,22 @@
 import {
-  type CommandsRegistry,
+  handlerLogin,
+  handlerRegister,
   registerCommand,
   runCommand,
-  handlerLogin,
+  type CommandsRegistry,
 } from "./commands.js";
 
 // Starts the CLI, reads arguments, and runs the requested command.
-function main(): void {
+async function main(): Promise<void> {
   const registry: CommandsRegistry = {};
 
   registerCommand(registry, "login", handlerLogin);
+  registerCommand(registry, "register", handlerRegister);
 
-  // Remove "node" and the script path.
   const args = process.argv.slice(2);
 
   if (args.length < 1) {
-    console.error("usage: cli <command> [args...]");
+    console.error("Error: command is required");
     process.exit(1);
   }
 
@@ -23,11 +24,13 @@ function main(): void {
   const cmdArgs = args.slice(1);
 
   try {
-    runCommand(registry, cmdName, ...cmdArgs);
+    await runCommand(registry, cmdName, ...cmdArgs);
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);
     process.exit(1);
   }
+
+  process.exit(0);
 }
 
 main();

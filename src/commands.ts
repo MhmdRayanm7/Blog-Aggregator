@@ -1,15 +1,55 @@
 import { setUser } from "./config";
+import { createUser, getUserByName } from "./db/queries/users";
 
-type CommandHandler = (cmdName: string, ...args: string[]) => void;
+// Defines the shape that every async CLI command handler must follow.
+export type CommandHandler = (
+  cmdName: string,
+  ...args: string[]
+) => Promise<void>;
 
 export type CommandsRegistry = Record<string, CommandHandler>;
 
-// Set the current user and save it to the config file.
-export function handlerLogin(cmdName: string, ...args: string[]) {
-  if (!args.length) {
+// Registers a new user, saves them as current, and prints the created user.
+export async function handlerRegister(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  if (args.length === 0) {
     throw new Error("Username is required");
   }
+
   const userName = args[0];
+
+  const existingUser = await getUserByName(userName);
+
+  if (existingUser) {
+    throw new Error(`User "${userName}" already exists`);
+  }
+
+  const user = await createUser(userName);
+
+  setUser(userName);
+
+  console.log(`User "${userName}" was created`);
+  console.log(user);
+}
+
+// Logs in only if the user already exists in the database.
+export async function handlerLogin(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  if (args.length === 0) {
+    throw new Error("Username is required");
+  }
+
+  const userName = args[0];
+
+  const user = await getUserByName(userName);
+
+  if (!user) {
+    throw new Error(`User "${userName}" does not exist`);
+  }
 
   setUser(userName);
 
@@ -25,17 +65,17 @@ export function registerCommand(
   registry[cmdName] = handler;
 }
 
-// Runs a registered command with the provided arguments.
-export function runCommand(
+// Runs a registered async command with the provided arguments.
+export async function runCommand(
   registry: CommandsRegistry,
   cmdName: string,
   ...args: string[]
-): void {
+): Promise<void> {
   const handler = registry[cmdName];
 
   if (!handler) {
     throw new Error(`Unknown command: ${cmdName}`);
   }
 
-  handler(cmdName, ...args);
+  await handler(cmdName, ...args);
 }
