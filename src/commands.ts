@@ -7,6 +7,43 @@ import {
   deleteAllUsers,
   getUsers,
 } from "./db/queries/users";
+import { Feed, User } from "./db/schema";
+import { createFeed } from "./db/queries/feeds";
+
+// Prints a feed together with the user who added it.
+function printFeed(feed: Feed, user: User): void {
+  console.log(`Feed ID: ${feed.id}`);
+  console.log(`Feed Name: ${feed.name}`);
+  console.log(`Feed URL: ${feed.url}`);
+  console.log(`User: ${user.name}`);
+}
+
+
+// Adds a new RSS feed for the currently logged-in user.
+export async function handlerAddFeed(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  if (args.length < 2) {
+    throw new Error("Feed name and URL are required");
+  }
+
+  const feedName = args[0];
+  const feedUrl = args[1];
+
+  const config = readConfig();
+
+  const user = await getUserByName(config.currentUserName);
+
+  if (!user) {
+    throw new Error("Current user does not exist");
+  }
+
+  const feed = await createFeed(feedName, feedUrl, user.id);
+
+  printFeed(feed, user);
+}
+
 
 // Fetches and prints the RSS feed used by the aggregator.
 export async function handlerAgg(
