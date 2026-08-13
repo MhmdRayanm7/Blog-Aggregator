@@ -1,6 +1,7 @@
 import {
   handlerLogin,
   handlerRegister,
+  handlerReset,
   registerCommand,
   runCommand,
   type CommandsRegistry,
@@ -12,6 +13,7 @@ async function main(): Promise<void> {
 
   registerCommand(registry, "login", handlerLogin);
   registerCommand(registry, "register", handlerRegister);
+  registerCommand(registry, "reset", handlerReset);
 
   const args = process.argv.slice(2);
 

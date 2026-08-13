@@ -20,3 +20,8 @@ export async function getUserByName(name: string) {
 
   return result;
 }
+
+// Deletes all users from the database.
+export async function deleteAllUsers(): Promise<void> {
+  await db.delete(users);
+}

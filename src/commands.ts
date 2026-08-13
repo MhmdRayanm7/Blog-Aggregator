@@ -1,5 +1,5 @@
 import { setUser } from "./config";
-import { createUser, getUserByName } from "./db/queries/users";
+import { createUser, getUserByName, deleteAllUsers } from "./db/queries/users";
 
 // Defines the shape that every async CLI command handler must follow.
 export type CommandHandler = (
@@ -8,6 +8,16 @@ export type CommandHandler = (
 ) => Promise<void>;
 
 export type CommandsRegistry = Record<string, CommandHandler>;
+
+// Deletes all users from the database.
+export async function handlerReset(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  await deleteAllUsers();
+
+  console.log("Database reset successfully");
+}
 
 // Registers a new user, saves them as current, and prints the created user.
 export async function handlerRegister(
