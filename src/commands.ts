@@ -1,5 +1,10 @@
-import { setUser } from "./config";
-import { createUser, getUserByName, deleteAllUsers } from "./db/queries/users";
+import { setUser, readConfig } from "./config";
+import {
+  createUser,
+  getUserByName,
+  deleteAllUsers,
+  getUsers,
+} from "./db/queries/users";
 
 // Defines the shape that every async CLI command handler must follow.
 export type CommandHandler = (
@@ -8,6 +13,21 @@ export type CommandHandler = (
 ) => Promise<void>;
 
 export type CommandsRegistry = Record<string, CommandHandler>;
+
+// Prints all users and marks the currently logged-in user.
+export async function handlerUsers(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  const allUsers = await getUsers();
+  const config = readConfig();
+
+  allUsers.forEach((user) => {
+    const isCurrent = user.name === config.currentUserName;
+
+    console.log(`* ${user.name}${isCurrent ? " (current)" : ""}`);
+  });
+}
 
 // Deletes all users from the database.
 export async function handlerReset(
