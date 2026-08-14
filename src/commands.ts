@@ -14,6 +14,34 @@ import {
   deleteFeedFollow,
   getFeedFollowsForUser,
 } from "./db/queries/feedFollows";
+import { scrapeFeeds } from "./aggregator";
+import { getPostsForUser } from "./db/queries/posts";
+
+// Converts a duration string like 1s, 1m, or 1h to milliseconds.
+function parseDuration(durationStr: string): number {
+  const regex = /^(\d+)(ms|s|m|h)$/;
+  const match = durationStr.match(regex);
+
+  if (!match) {
+    throw new Error("Invalid duration format");
+  }
+
+  const value = Number(match[1]);
+  const unit = match[2];
+
+  switch (unit) {
+    case "ms":
+      return value;
+    case "s":
+      return value * 1000;
+    case "m":
+      return value * 60 * 1000;
+    case "h":
+      return value * 60 * 60 * 1000;
+    default:
+      throw new Error("Invalid duration unit");
+  }
+}
 
 // Unfollows a feed for the logged-in user.
 export async function handlerUnfollow(
@@ -115,7 +143,8 @@ export async function handlerFeeds(
   });
 }
 
-// Adds a new RSS feed for the currently logged-in user.
+
+// Adds a new RSS feed and automatically follows it for the logged-in user.
 export async function handlerAddFeed(
   cmdName: string,
   user: User,
@@ -136,14 +165,63 @@ export async function handlerAddFeed(
   printFeed(feed, user);
 }
 
-// Fetches and prints the RSS feed used by the aggregator.
+// Prints the latest posts from feeds followed by the logged-in user.
+export async function handlerBrowse(
+  cmdName: string,
+  user: User,
+  ...args: string[]
+): Promise<void> {
+  const limit = args[0] ? Number(args[0]) : 2;
+
+  if (Number.isNaN(limit) || limit <= 0) {
+    throw new Error("Limit must be a positive number");
+  }
+
+  const results = await getPostsForUser(user.id, limit);
+
+  results.forEach(({ posts: post }) => {
+    console.log(post.title);
+    console.log(post.url);
+
+    if (post.description) {
+      console.log(post.description);
+    }
+
+    console.log();
+  });
+}
+
+// Continuously fetches feeds at the requested interval.
 export async function handlerAgg(
   cmdName: string,
   ...args: string[]
 ): Promise<void> {
-  const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
+  if (args.length === 0) {
+    throw new Error("Time between requests is required");
+  }
 
-  console.log(JSON.stringify(feed, null, 2));
+  const duration = args[0];
+  const timeBetweenRequests = parseDuration(duration);
+
+  console.log(`Collecting feeds every ${duration}`);
+
+  const handleError = (err: unknown) => {
+    console.error(err instanceof Error ? err.message : err);
+  };
+
+  await scrapeFeeds().catch(handleError);
+
+  const interval = setInterval(() => {
+    scrapeFeeds().catch(handleError);
+  }, timeBetweenRequests);
+
+  await new Promise<void>((resolve) => {
+    process.on("SIGINT", () => {
+      console.log("Shutting down feed aggregator...");
+      clearInterval(interval);
+      resolve();
+    });
+  });
 }
 
 // Defines the shape that every async CLI command handler must follow.

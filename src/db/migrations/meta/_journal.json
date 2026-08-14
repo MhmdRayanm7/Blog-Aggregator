@@ -22,6 +22,20 @@
       "when": 1786723480071,
       "tag": "0002_concerned_agent_zero",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786744071127,
+      "tag": "0003_motionless_hedge_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786744349435,
+      "tag": "0004_lethal_the_spike",
+      "breakpoints": true
     }
   ]
 }
