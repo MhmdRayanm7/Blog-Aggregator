@@ -1,51 +1,73 @@
 import {
-  handlerAddFeed,
-  handlerAgg,
-  handlerBrowse,
-  handlerFeeds,
-  handlerFollow,
-  handlerFollowing,
   handlerLogin,
   handlerRegister,
   handlerReset,
-  handlerUnfollow,
   handlerUsers,
-  middlewareLoggedIn,
-  registerCommand,
-  runCommand,
-  type CommandsRegistry,
-} from "./commands.js";
+} from "./commands/auth.js";
 
-// Starts the CLI, reads arguments, and runs the requested command.
-async function main(): Promise<void> {
+import { handlerAddFeed, handlerFeeds } from "./commands/feeds.js";
+
+import {
+  handlerFollow,
+  handlerFollowing,
+  handlerUnfollow,
+} from "./commands/follows.js";
+
+import { handlerBrowse } from "./commands/posts.js";
+import { handlerAgg } from "./commands/aggregate.js";
+
+import { middlewareLoggedIn } from "./cli/middleware.js";
+
+import { registerCommand, runCommand } from "./cli/registry.js";
+
+import type { CommandsRegistry } from "./cli/types.js";
+
+// Creates and configures all available CLI commands.
+function createRegistry(): CommandsRegistry {
   const registry: CommandsRegistry = {};
 
   registerCommand(registry, "login", handlerLogin);
+
   registerCommand(registry, "register", handlerRegister);
+
   registerCommand(registry, "reset", handlerReset);
+
   registerCommand(registry, "users", handlerUsers);
-  registerCommand(registry, "agg", handlerAgg);
+
   registerCommand(registry, "feeds", handlerFeeds);
+
+  registerCommand(registry, "agg", handlerAgg);
+
   registerCommand(registry, "addfeed", middlewareLoggedIn(handlerAddFeed));
+
   registerCommand(registry, "follow", middlewareLoggedIn(handlerFollow));
+
   registerCommand(registry, "following", middlewareLoggedIn(handlerFollowing));
+
   registerCommand(registry, "unfollow", middlewareLoggedIn(handlerUnfollow));
+
   registerCommand(registry, "browse", middlewareLoggedIn(handlerBrowse));
 
-  const args = process.argv.slice(2);
+  return registry;
+}
 
-  if (args.length < 1) {
+// Starts the CLI and runs the requested command.
+async function main(): Promise<void> {
+  const [cmdName, ...args] = process.argv.slice(2);
+
+  if (!cmdName) {
     console.error("Error: command is required");
+
     process.exit(1);
   }
 
-  const cmdName = args[0];
-  const cmdArgs = args.slice(1);
+  const registry = createRegistry();
 
   try {
-    await runCommand(registry, cmdName, ...cmdArgs);
-  } catch (err) {
-    console.error(err instanceof Error ? err.message : err);
+    await runCommand(registry, cmdName, ...args);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+
     process.exit(1);
   }
 

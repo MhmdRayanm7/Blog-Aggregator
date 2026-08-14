@@ -1,11 +1,12 @@
 import { and, eq } from "drizzle-orm";
 
-import { db } from "..";
-import { feedFollows, feeds, users } from "../schema";
+import { db } from "../index.js";
 
-// Creates a feed follow and returns it with the linked user and feed names.
+import { feedFollows, feeds, users } from "../schema.js";
+
+// Creates a feed follow and returns related names.
 export async function createFeedFollow(userId: string, feedId: string) {
-  const [newFeedFollow] = await db
+  const [createdFollow] = await db
     .insert(feedFollows)
     .values({
       userId,
@@ -13,7 +14,7 @@ export async function createFeedFollow(userId: string, feedId: string) {
     })
     .returning();
 
-  const [result] = await db
+  const [follow] = await db
     .select({
       id: feedFollows.id,
       createdAt: feedFollows.createdAt,
@@ -26,20 +27,19 @@ export async function createFeedFollow(userId: string, feedId: string) {
     .from(feedFollows)
     .innerJoin(users, eq(feedFollows.userId, users.id))
     .innerJoin(feeds, eq(feedFollows.feedId, feeds.id))
-    .where(eq(feedFollows.id, newFeedFollow.id));
+    .where(eq(feedFollows.id, createdFollow.id));
 
-  return result;
+  return follow;
 }
 
-// Returns all feeds followed by a given user.
+// Returns all feeds followed by a user.
 export async function getFeedFollowsForUser(userId: string) {
-  return await db
+  return db
     .select({
       id: feedFollows.id,
-      userId: feedFollows.userId,
       feedId: feedFollows.feedId,
-      userName: users.name,
       feedName: feeds.name,
+      userName: users.name,
     })
     .from(feedFollows)
     .innerJoin(users, eq(feedFollows.userId, users.id))
@@ -47,7 +47,7 @@ export async function getFeedFollowsForUser(userId: string) {
     .where(eq(feedFollows.userId, userId));
 }
 
-// Deletes a feed follow using the user ID and feed URL.
+// Deletes a user's follow for a feed URL.
 export async function deleteFeedFollow(
   userId: string,
   feedUrl: string,

@@ -1,25 +1,22 @@
-import { desc, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
-import { db } from "..";
-import { feedFollows, posts } from "../schema";
+import { db } from "../index.js";
 
-// Creates a post and ignores it if its URL already exists.
-export async function createPost(
-  title: string,
-  url: string,
-  feedId: string,
-  description?: string,
-  publishedAt?: Date,
-) {
+import { feedFollows, posts } from "../schema.js";
+
+type CreatePostParams = {
+  title: string;
+  url: string;
+  feedId: string;
+  description?: string;
+  publishedAt?: Date;
+};
+
+// Creates a post and ignores duplicate URLs.
+export async function createPost(params: CreatePostParams) {
   const [post] = await db
     .insert(posts)
-    .values({
-      title,
-      url,
-      feedId,
-      description,
-      publishedAt,
-    })
+    .values(params)
     .onConflictDoNothing({
       target: posts.url,
     })
@@ -29,18 +26,19 @@ export async function createPost(
 }
 
 // Returns the latest posts from feeds followed by a user.
-export async function getPostsForUser(
-  userId: string,
-  limit: number,
-) {
-  return await db
-    .select()
+export async function getPostsForUser(userId: string, limit: number) {
+  return db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      description: posts.description,
+      publishedAt: posts.publishedAt,
+      feedId: posts.feedId,
+    })
     .from(posts)
-    .innerJoin(
-      feedFollows,
-      eq(posts.feedId, feedFollows.feedId),
-    )
+    .innerJoin(feedFollows, eq(posts.feedId, feedFollows.feedId))
     .where(eq(feedFollows.userId, userId))
-    .orderBy(desc(posts.publishedAt))
+    .orderBy(sql`${posts.publishedAt} DESC NULLS LAST`)
     .limit(limit);
 }

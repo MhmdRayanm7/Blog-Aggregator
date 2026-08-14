@@ -1,63 +1,74 @@
-import fs from "fs";
-import os from "os";
-import path from "path";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 type Config = {
   dbUrl: string;
   currentUserName: string;
 };
 
-// Update the current user and save the config file.
-export function setUser(userName: string) {
-  const config = readConfig();
-  config.currentUserName = userName;
-  writeConfig(config);
+// Checks whether a value is a plain object-like record.
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
-// Validate raw JSON data and convert it to Config.
-function validateConfig(rawConfig: any): Config {
-  if (!rawConfig.db_url || typeof rawConfig.db_url !== "string") {
+// Validates raw JSON and converts it to application config.
+function validateConfig(rawConfig: unknown): Config {
+  if (!isRecord(rawConfig)) {
+    throw new Error("Invalid config file");
+  }
+
+  if (typeof rawConfig.db_url !== "string" || rawConfig.db_url.length === 0) {
     throw new Error("db_url is required in config file");
   }
 
-  const config: Config = {
+  if (
+    rawConfig.current_user_name !== undefined &&
+    typeof rawConfig.current_user_name !== "string"
+  ) {
+    throw new Error("current_user_name must be a string");
+  }
+
+  return {
     dbUrl: rawConfig.db_url,
     currentUserName: rawConfig.current_user_name ?? "",
   };
-
-  return config;
 }
 
-// Read the config file and return a validated Config object.
-export function readConfig(): Config {
-  const fullPath = getConfigFilePath();
-
-  const data = fs.readFileSync(fullPath, "utf-8");
-  const rawConfig = JSON.parse(data);
-
-  return validateConfig(rawConfig);
-}
-
-// Build the full path to ~/.gatorconfig.json.
+// Builds the path to ~/.gatorconfig.json.
 function getConfigFilePath(): string {
-  const configFileName = ".gatorconfig.json";
-  const homeDir = os.homedir();
-
-  return path.join(homeDir, configFileName);
+  return path.join(os.homedir(), ".gatorconfig.json");
 }
 
-// Convert Config to JSON format and save it to the file.
+// Writes application config to the JSON file.
 function writeConfig(config: Config): void {
-  const fullPath = getConfigFilePath();
-
   const rawConfig = {
     db_url: config.dbUrl,
     current_user_name: config.currentUserName,
   };
 
-  const data = JSON.stringify(rawConfig, null, 2);
+  fs.writeFileSync(
+    getConfigFilePath(),
+    JSON.stringify(rawConfig, null, 2),
+    "utf-8",
+  );
+}
 
-  fs.writeFileSync(fullPath, data, {
-    encoding: "utf-8",
+// Reads and validates the application config.
+export function readConfig(): Config {
+  const data = fs.readFileSync(getConfigFilePath(), "utf-8");
+
+  const rawConfig: unknown = JSON.parse(data);
+
+  return validateConfig(rawConfig);
+}
+
+// Changes the currently logged-in user.
+export function setUser(userName: string): void {
+  const config = readConfig();
+
+  writeConfig({
+    ...config,
+    currentUserName: userName,
   });
 }
