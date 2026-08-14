@@ -13,37 +13,37 @@ The project was originally built as part of the Boot.dev Gator guided project an
 
 ## Features
 
-* Register local users
-* Switch between existing users
-* Add RSS feeds
-* List feeds and their creators
-* Follow and unfollow feeds
-* Support many-to-many relationships between users and feeds
-* Continuously fetch RSS feeds
-* Fetch the least-recently-updated feed first
-* Parse RSS XML
-* Store posts in PostgreSQL
-* Prevent duplicate posts using unique URLs
-* Browse posts from feeds followed by the current user
-* Configurable browse limits
-* Configurable aggregation intervals
-* Logged-in command middleware
-* PostgreSQL migrations with Drizzle Kit
-* Type-safe database access with Drizzle ORM
+- Register local users
+- Switch between existing users
+- Add RSS feeds
+- List feeds and their creators
+- Follow and unfollow feeds
+- Support many-to-many relationships between users and feeds
+- Continuously fetch RSS feeds
+- Fetch the least-recently-updated feed first
+- Parse RSS XML
+- Store posts in PostgreSQL
+- Prevent duplicate posts using unique URLs
+- Browse posts from feeds followed by the current user
+- Configurable browse limits
+- Configurable aggregation intervals
+- Logged-in command middleware
+- PostgreSQL migrations with Drizzle Kit
+- Type-safe database access with Drizzle ORM
 
 ---
 
 ## Tech Stack
 
-* TypeScript
-* Node.js
-* PostgreSQL
-* Drizzle ORM
-* Drizzle Kit
-* postgres.js
-* fast-xml-parser
-* tsx
-* NVM
+- TypeScript
+- Node.js
+- PostgreSQL
+- Drizzle ORM
+- Drizzle Kit
+- postgres.js
+- fast-xml-parser
+- tsx
+- NVM
 
 ---
 
@@ -99,11 +99,11 @@ Wait and repeat
 
 Before running Gator, install:
 
-* Git
-* NVM
-* Node.js
-* npm
-* PostgreSQL
+- Git
+- NVM
+- Node.js
+- npm
+- PostgreSQL
 
 The repository contains an `.nvmrc`, so NVM can automatically use the correct Node.js version.
 
@@ -861,5 +861,3 @@ After some feeds have been fetched:
 ```bash
 npm run start browse 5
 ```
-
-

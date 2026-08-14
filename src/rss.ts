@@ -56,8 +56,7 @@ export async function fetchFeed(feedURL: string): Promise<RSSFeed> {
       : [channel.item]
     : []; // Makes sure channel.item is always an array.
 
-
-    // Keeps only valid RSS items and converts them to our RSSItem format.
+  // Keeps only valid RSS items and converts them to our RSSItem format.
   const items: RSSItem[] = rawItems
     .filter(
       (item: any) =>
@@ -66,7 +65,8 @@ export async function fetchFeed(feedURL: string): Promise<RSSFeed> {
         typeof item.description === "string" &&
         typeof item.pubDate === "string",
     )
-    .map((item: any) => ({  //To take only needed fields
+    .map((item: any) => ({
+      //To take only needed fields
 
       title: item.title,
       link: item.link,
