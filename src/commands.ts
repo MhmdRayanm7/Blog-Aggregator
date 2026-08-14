@@ -11,8 +11,26 @@ import { Feed, User } from "./db/schema";
 import { createFeed, getFeedByUrl, getFeeds } from "./db/queries/feeds";
 import {
   createFeedFollow,
+  deleteFeedFollow,
   getFeedFollowsForUser,
 } from "./db/queries/feedFollows";
+
+// Unfollows a feed for the logged-in user.
+export async function handlerUnfollow(
+  cmdName: string,
+  user: User,
+  ...args: string[]
+): Promise<void> {
+  if (args.length === 0) {
+    throw new Error("Feed URL is required");
+  }
+
+  const feedUrl = args[0];
+
+  await deleteFeedFollow(user.id, feedUrl);
+
+  console.log(`Unfollowed feed: ${feedUrl}`);
+}
 
 // Defines commands that require a logged-in user.
 export type UserCommandHandler = (

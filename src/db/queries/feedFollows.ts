@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "..";
 import { feedFollows, feeds, users } from "../schema";
@@ -45,4 +45,22 @@ export async function getFeedFollowsForUser(userId: string) {
     .innerJoin(users, eq(feedFollows.userId, users.id))
     .innerJoin(feeds, eq(feedFollows.feedId, feeds.id))
     .where(eq(feedFollows.userId, userId));
+}
+
+// Deletes a feed follow using the user ID and feed URL.
+export async function deleteFeedFollow(
+  userId: string,
+  feedUrl: string,
+): Promise<void> {
+  const [feed] = await db.select().from(feeds).where(eq(feeds.url, feedUrl));
+
+  if (!feed) {
+    throw new Error(`Feed not found: ${feedUrl}`);
+  }
+
+  await db
+    .delete(feedFollows)
+    .where(
+      and(eq(feedFollows.userId, userId), eq(feedFollows.feedId, feed.id)),
+    );
 }
