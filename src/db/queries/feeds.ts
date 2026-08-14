@@ -20,7 +20,6 @@ export async function createFeed(
   return result;
 }
 
-
 // Returns all feeds with the name of the user who created each feed.
 export async function getFeeds() {
   return await db
@@ -31,4 +30,14 @@ export async function getFeeds() {
     })
     .from(feeds)
     .innerJoin(users, eq(feeds.userId, users.id));
+}
+
+// Finds a feed by its URL.
+export async function getFeedByUrl(url: string) {
+  const [result] = await db
+    .select()
+    .from(feeds)
+    .where(eq(feeds.url, url));
+
+  return result;
 }

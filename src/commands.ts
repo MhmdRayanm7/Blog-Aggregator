@@ -8,7 +8,60 @@ import {
   getUsers,
 } from "./db/queries/users";
 import { Feed, User } from "./db/schema";
-import { createFeed, getFeeds } from "./db/queries/feeds";
+import { createFeed, getFeedByUrl, getFeeds } from "./db/queries/feeds";
+import {
+  createFeedFollow,
+  getFeedFollowsForUser,
+} from "./db/queries/feedFollows";
+
+// Prints all feeds followed by the current user.
+export async function handlerFollowing(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  const config = readConfig();
+
+  const user = await getUserByName(config.currentUserName);
+
+  if (!user) {
+    throw new Error("Current user does not exist");
+  }
+
+  const follows = await getFeedFollowsForUser(user.id);
+
+  follows.forEach((follow) => {
+    console.log(`* ${follow.feedName}`);
+  });
+}
+
+// Follows an existing feed for the current user.
+export async function handlerFollow(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  if (args.length === 0) {
+    throw new Error("Feed URL is required");
+  }
+
+  const url = args[0];
+  const config = readConfig();
+
+  const user = await getUserByName(config.currentUserName);
+
+  if (!user) {
+    throw new Error("Current user does not exist");
+  }
+
+  const feed = await getFeedByUrl(url);
+
+  if (!feed) {
+    throw new Error("Feed does not exist");
+  }
+
+  const follow = await createFeedFollow(user.id, feed.id);
+
+  console.log(`${follow.userName} is now following ${follow.feedName}`);
+}
 
 // Prints a feed together with the user who added it.
 function printFeed(feed: Feed, user: User): void {
@@ -55,6 +108,9 @@ export async function handlerAddFeed(
   }
 
   const feed = await createFeed(feedName, feedUrl, user.id);
+  const follow = await createFeedFollow(user.id, feed.id);
+
+  console.log(`${follow.userName} is now following ${follow.feedName}`);
 
   printFeed(feed, user);
 }
