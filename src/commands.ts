@@ -14,19 +14,36 @@ import {
   getFeedFollowsForUser,
 } from "./db/queries/feedFollows";
 
+// Defines commands that require a logged-in user.
+export type UserCommandHandler = (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => Promise<void>;
+
+// Ensures a user is logged in before running a protected command.
+export function middlewareLoggedIn(
+  handler: UserCommandHandler,
+): CommandHandler {
+  return async (cmdName: string, ...args: string[]): Promise<void> => {
+    const config = readConfig();
+
+    const user = await getUserByName(config.currentUserName);
+
+    if (!user) {
+      throw new Error(`User ${config.currentUserName} not found`);
+    }
+
+    await handler(cmdName, user, ...args);
+  };
+}
+
 // Prints all feeds followed by the current user.
 export async function handlerFollowing(
   cmdName: string,
+  user: User,
   ...args: string[]
 ): Promise<void> {
-  const config = readConfig();
-
-  const user = await getUserByName(config.currentUserName);
-
-  if (!user) {
-    throw new Error("Current user does not exist");
-  }
-
   const follows = await getFeedFollowsForUser(user.id);
 
   follows.forEach((follow) => {
@@ -37,6 +54,7 @@ export async function handlerFollowing(
 // Follows an existing feed for the current user.
 export async function handlerFollow(
   cmdName: string,
+  user: User,
   ...args: string[]
 ): Promise<void> {
   if (args.length === 0) {
@@ -44,13 +62,6 @@ export async function handlerFollow(
   }
 
   const url = args[0];
-  const config = readConfig();
-
-  const user = await getUserByName(config.currentUserName);
-
-  if (!user) {
-    throw new Error("Current user does not exist");
-  }
 
   const feed = await getFeedByUrl(url);
 
@@ -86,10 +97,10 @@ export async function handlerFeeds(
   });
 }
 
-
 // Adds a new RSS feed for the currently logged-in user.
 export async function handlerAddFeed(
   cmdName: string,
+  user: User,
   ...args: string[]
 ): Promise<void> {
   if (args.length < 2) {
@@ -99,14 +110,6 @@ export async function handlerAddFeed(
   const feedName = args[0];
   const feedUrl = args[1];
 
-  const config = readConfig();
-
-  const user = await getUserByName(config.currentUserName);
-
-  if (!user) {
-    throw new Error("Current user does not exist");
-  }
-
   const feed = await createFeed(feedName, feedUrl, user.id);
   const follow = await createFeedFollow(user.id, feed.id);
 
@@ -114,7 +117,6 @@ export async function handlerAddFeed(
 
   printFeed(feed, user);
 }
-
 
 // Fetches and prints the RSS feed used by the aggregator.
 export async function handlerAgg(

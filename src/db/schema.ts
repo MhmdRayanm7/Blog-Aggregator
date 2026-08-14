@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, unique, } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, unique } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
@@ -9,6 +9,8 @@ export const users = pgTable("users", {
     .$onUpdate(() => new Date()),
   name: text("name").notNull().unique(),
 });
+
+export type User = typeof users.$inferSelect;
 
 // Stores RSS feeds and links each feed to the user who added it.
 export const feeds = pgTable("feeds", {
@@ -58,5 +60,4 @@ export const feedFollows = pgTable(
   }),
 );
 
-export type User = typeof users.$inferSelect;
 export type Feed = typeof feeds.$inferSelect;
