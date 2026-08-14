@@ -1,6 +1,7 @@
 # Gator — RSS Feed Aggregator CLI
 
 [![CI](https://github.com/MhmdRayanm7/Blog-Aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/MhmdRayanm7/Blog-Aggregator/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Gator is a command-line RSS feed aggregator built with **TypeScript, PostgreSQL, and Drizzle ORM**.
 
