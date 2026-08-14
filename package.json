@@ -1,7 +1,7 @@
 {
   "name": "blog-aggregator",
   "version": "1.0.0",
-  "description": "",
+  "description": "A TypeScript CLI RSS feed aggregator backed by PostgreSQL and Drizzle ORM",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -14,8 +14,15 @@
     "type": "git",
     "url": "git+https://github.com/MhmdRayanm7/Blog-Aggregator.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "typescript",
+    "nodejs",
+    "postgresql",
+    "drizzle-orm",
+    "rss",
+    "cli"
+  ],
+  "author": "Mhmd Rayan",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/MhmdRayanm7/Blog-Aggregator/issues"
