@@ -8,7 +8,7 @@ import {
   getUsers,
 } from "./db/queries/users";
 import { Feed, User } from "./db/schema";
-import { createFeed } from "./db/queries/feeds";
+import { createFeed, getFeeds } from "./db/queries/feeds";
 
 // Prints a feed together with the user who added it.
 function printFeed(feed: Feed, user: User): void {
@@ -16,6 +16,21 @@ function printFeed(feed: Feed, user: User): void {
   console.log(`Feed Name: ${feed.name}`);
   console.log(`Feed URL: ${feed.url}`);
   console.log(`User: ${user.name}`);
+}
+
+// Prints all feeds with their URL and creator name.
+export async function handlerFeeds(
+  cmdName: string,
+  ...args: string[]
+): Promise<void> {
+  const allFeeds = await getFeeds();
+
+  allFeeds.forEach((feed) => {
+    console.log(`Name: ${feed.name}`);
+    console.log(`URL: ${feed.url}`);
+    console.log(`User: ${feed.userName}`);
+    console.log();
+  });
 }
 
 

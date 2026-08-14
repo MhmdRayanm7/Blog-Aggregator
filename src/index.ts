@@ -1,6 +1,7 @@
 import {
   handlerAddFeed,
   handlerAgg,
+  handlerFeeds,
   handlerLogin,
   handlerRegister,
   handlerReset,
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
   registerCommand(registry, "users", handlerUsers);
   registerCommand(registry, "agg", handlerAgg);
   registerCommand(registry, "addfeed", handlerAddFeed);
+  registerCommand(registry, "feeds", handlerFeeds);
 
   const args = process.argv.slice(2);
 
