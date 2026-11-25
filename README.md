@@ -2,6 +2,11 @@
 
 [![CI](https://github.com/MhmdRayanm7/Blog-Aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/MhmdRayanm7/Blog-Aggregator/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?logo=drizzle&logoColor=black)
+
 
 Gator is a command-line RSS feed aggregator built with **TypeScript, PostgreSQL, and Drizzle ORM**.
 
